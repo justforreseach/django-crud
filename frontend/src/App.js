@@ -3,7 +3,6 @@ import axios from 'axios';
 import UserForm from './components/UserForm';
 import UserList from './components/UserList';
 import UserModal from './components/UserModal';
-import Notification from './components/Notification';
 import './App.css';
 
 const API_BASE_URL = 'http://localhost:8000/api';
@@ -12,19 +11,10 @@ function App() {
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
   const [viewingUser, setViewingUser] = useState(null);
-  const [notification, setNotification] = useState({ message: '', type: 'success' });
 
   useEffect(() => {
     fetchUsers();
   }, []);
-
-  const showNotification = (message, type = 'success') => {
-    setNotification({ message, type });
-  };
-
-  const hideNotification = () => {
-    setNotification({ message: '', type: 'success' });
-  };
 
   const fetchUsers = async () => {
     try {
@@ -33,7 +23,6 @@ function App() {
     } catch (error) {
       console.error('Error fetching users:', error);
       console.error('Error details:', error.response?.data || error.message);
-      showNotification('Error fetching users: ' + (error.response?.data?.detail || error.message), 'error');
     }
   };
 
@@ -48,7 +37,6 @@ function App() {
       });
       console.log('Response:', response.data);
       console.log('Response status:', response.status);
-      showNotification('User added successfully!', 'success');
       await fetchUsers();
     } catch (error) {
       console.error('Full error object:', error);
@@ -73,12 +61,12 @@ function App() {
                     error.response.data?.error ||
                     JSON.stringify(error.response.data);
         }
-        showNotification('Error adding user: ' + errorMsg, 'error');
+        console.error('Error adding user: ' + errorMsg);
       } else if (error.request) {
         console.error('No response received. Request:', error.request);
-        showNotification('Error adding user: Network Error. Make sure Django server is running on http://localhost:8000', 'error');
+        console.error('Error adding user: Network Error. Make sure Django server is running on http://localhost:8000');
       } else {
-        showNotification('Error adding user: ' + error.message, 'error');
+        console.error('Error adding user: ' + error.message);
       }
     }
   };
@@ -90,7 +78,6 @@ function App() {
           'Content-Type': 'application/json',
         },
       });
-      showNotification('User updated successfully!', 'success');
       setEditingUser(null);
       fetchUsers();
     } catch (error) {
@@ -108,7 +95,7 @@ function App() {
       } else {
         errorMsg = error.response?.data?.detail || error.message;
       }
-      showNotification('Error updating user: ' + errorMsg, 'error');
+      console.error('Error updating user: ' + errorMsg);
     }
   };
 
@@ -116,11 +103,10 @@ function App() {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
         await axios.delete(`${API_BASE_URL}/users/${id}/`);
-        showNotification('User deleted successfully!', 'success');
         await fetchUsers();
       } catch (error) {
         console.error('Error deleting user:', error);
-        showNotification('Error deleting user: ' + (error.response?.data?.detail || error.message), 'error');
+        console.error('Error deleting user: ' + (error.response?.data?.detail || error.message));
       }
     }
   };
@@ -131,7 +117,7 @@ function App() {
       setViewingUser(response.data);
     } catch (error) {
       console.error('Error viewing user:', error);
-      showNotification('Error viewing user: ' + (error.response?.data?.error || error.message), 'error');
+      console.error('Error viewing user: ' + (error.response?.data?.error || error.message));
     }
   };
 
@@ -150,11 +136,6 @@ function App() {
   return (
     <div className="container">
       <h1>User Management</h1>
-      <Notification
-        message={notification.message}
-        type={notification.type}
-        onClose={hideNotification}
-      />
       <UserForm
         onSubmit={editingUser ? (data) => handleUpdateUser(editingUser.id, data) : handleAddUser}
         editingUser={editingUser}
