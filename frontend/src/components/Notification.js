@@ -5,7 +5,7 @@ function Notification({ message, type, onClose }) {
     if (message) {
       const timer = setTimeout(() => {
         onClose();
-      }, 3000);
+      }, 2500);
       return () => clearTimeout(timer);
     }
   }, [message, onClose]);
@@ -14,8 +14,7 @@ function Notification({ message, type, onClose }) {
 
   return (
     <div className={`notification notification-${type}`}>
-      <span className="notification-message">{message}</span>
-      <button className="notification-close" onClick={onClose}>×</button>
+      {message}
     </div>
   );
 }
